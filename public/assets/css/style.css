@@ -1,0 +1,14 @@
+:root{--bd-green:#0a7a3d;--bd-dark:#065c2d}
+body{font-family:'Hind Siliguri',system-ui,Arial,sans-serif;background:#f6f9f6}
+.topbar{background:var(--bd-dark);color:#fff;font-size:.85rem}
+.navbar-brand{font-weight:800;color:var(--bd-green)!important}
+.hero{background:linear-gradient(135deg,#0a7a3d,#065c2d);color:#fff;border-radius:1rem}
+.job-card{transition:.15s}.job-card:hover{transform:translateY(-2px);box-shadow:0 .5rem 1rem rgba(0,0,0,.12)}
+.badge-status-Running{background:#198754}.badge-status-Closed{background:#dc3545}.badge-status-Upcoming{background:#ffc107;color:#000}.badge-status-Unpublished{background:#6c757d}
+.summary-card{border-top:5px solid var(--bd-green)}
+footer{background:#0b3d22;color:#d7e9dc}
+footer a{color:#d7e9dc;text-decoration:none}footer a:hover{color:#fff}
+.sidebar{min-height:100vh;background:#0b3d22;color:#fff}
+.sidebar a{color:#d7e9dc;display:block;padding:.6rem 1rem;border-radius:.5rem;text-decoration:none}
+.sidebar a.active,.sidebar a:hover{background:#0a7a3d;color:#fff}
+.toast-wrap{position:fixed;top:1rem;right:1rem;z-index:9999}

@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All Jobs - BD Govt Jobs</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="/assets/css/style.css" rel="stylesheet"></head><body>
+<nav class="navbar navbar-expand-lg bg-white shadow-sm"><div class="container"><a class="navbar-brand" href="/">BD Govt Jobs</a>
+<div class="ms-auto"><a href="/" class="btn btn-sm btn-outline-success">Home</a></div></div></nav>
+<div class="container mt-3"><h2>All Jobs</h2>
+<div class="card p-3 mb-3"><div class="row g-2">
+<div class="col-md-3"><input id="fSearch" class="form-control" placeholder="Search title/institution"></div>
+<div class="col-md-2"><select id="fCat" class="form-select"><option value="">All Categories</option></select></div>
+<div class="col-md-2"><select id="fInst" class="form-select"><option value="">All Institutions</option></select></div>
+<div class="col-md-2"><select id="fType" class="form-select"><option value="">All Types</option><option value="full-time">Full-time</option><option value="part-time">Part-time</option><option value="contract">Contract</option></select></div>
+<div class="col-md-2"><select id="fSort" class="form-select"><option value="">Newest</option><option value="deadline">Deadline</option></select></div>
+<div class="col-md-1"><button id="fGo" class="btn btn-success w-100">Go</button></div>
+</div></div>
+<div id="list" class="row"></div><div id="pager" class="text-center mb-4"></div></div>
+<script src="/assets/js/api.js"></script>
+<script>
+let page=1;
+async function initFilters(){
+ const cats=await apiGet('/categories'); cats.forEach(c=>{const o=document.createElement('option');o.value=c.slug;o.textContent=c.name;$('#fCat').appendChild(o)});
+ const insts=await apiGet('/institutions'); insts.forEach(i=>{const o=document.createElement('option');o.value=i.slug;o.textContent=i.name;$('#fInst').appendChild(o)});
+ const p=new URLSearchParams(location.search); if(p.get('q')) $('#fSearch').value=p.get('q');
+}
+async function load(){
+ const q=new URLSearchParams({page,limit:12,search:$('#fSearch').value,category:$('#fCat').value,institution:$('#fInst').value,jobType:$('#fType').value,sort:$('#fSort').value});
+ const r=await apiGet('/jobs?'+q.toString());
+ $('#list').innerHTML=r.data.map(jobCard).join('')||'<p>No jobs found.</p>';
+ $('#pager').innerHTML=`<button class="btn btn-sm btn-outline-success" ${page<=1?'disabled':''} onclick="page--;load()">Prev</button> Page ${r.meta.page}/${r.meta.pages||1} <button class="btn btn-sm btn-outline-success" ${page>=(r.meta.pages||1)?'disabled':''} onclick="page++;load()">Next</button>`;
+}
+$('#fGo').onclick=()=>{page=1;load()};
+initFilters().then(load);
+</script></body></html>

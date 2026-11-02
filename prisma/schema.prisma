@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("admin")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model JobGrade {
+  id        Int      @id @default(autoincrement())
+  name      String
+  label     String?
+  code      String   @unique
+  salaryMin Int?
+  salaryMax Int?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobs      Job[]
+}
+
+model Institution {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  logo        String?
+  type        String?
+  description String?
+  address     String?
+  website     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  jobs        Job[]
+}
+
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String
+  slug         String        @unique
+  description  String?
+  icon         String?
+  featuredImage String?
+  sortOrder    Int           @default(0)
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  jobs         JobCategory[]
+}
+
+model Author {
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  profileImage String?
+  designation  String?
+  bio          String?
+  website      String?
+  socials      Json?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  jobs         Job[]
+}
+
+model Job {
+  id              Int           @id @default(autoincrement())
+  title           String
+  slug            String        @unique
+  shortInfo       String?
+  totalPosts      Int?
+  jobType         String?       @default("full-time")
+  salaryOverride  Int?
+  education       String?
+  ageLimit        String?
+  experience      String?
+  applicationFee  String?
+  applyUrl        String?
+  circularImage   String?
+  circularPdf     String?
+  status          String        @default("draft") // draft | published
+  isFeatured      Boolean       @default(false)
+  publishedAt     DateTime?
+  applyStart      DateTime?
+  applyDeadline   DateTime?
+  seoTitle        String?
+  seoDescription  String?
+  canonicalUrl    String?
+  ogImage         String?
+  viewCount       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  gradeId       Int?
+  grade         JobGrade?    @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+  institutionId Int?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+  authorId      Int?
+  author        Author?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  categories    JobCategory[]
+  contentBlocks ContentBlock[]
+  circulars     Circular[]
+  faqs          Faq[]
+
+  @@index([status, publishedAt])
+  @@index([slug])
+}
+
+model JobCategory {
+  jobId      Int
+  categoryId Int
+  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  @@id([jobId, categoryId])
+}
+
+model ContentBlock {
+  id        Int      @id @default(autoincrement())
+  jobId     Int
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  type      String   // heading | paragraph | richtext | image | gallery | table | list | notice | warning | download | button | faq | video
+  title     String?
+  content   String?
+  meta      Json?
+  sortOrder Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Circular {
+  id        Int      @id @default(autoincrement())
+  jobId     Int
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileType  String?
+  label     String?
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  filename  String
+  url       String
+  mimeType  String?
+  size      Int?
+  kind      String?  // logo | circular | content | pdf | other
+  createdAt DateTime @default(now())
+}
+
+model Notice {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String?
+  fileUrl     String?
+  status      String    @default("draft")
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  jobId     Int?
+  job       Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Page {
+  id             Int      @id @default(autoincrement())
+  title          String
+  slug           String   @unique
+  content        String?
+  status         String   @default("draft")
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String?
+  updatedAt DateTime @updatedAt
+}
+
+model SeoMetadata {
+  id          Int      @id @default(autoincrement())
+  scope       String   @unique // global
+  title       String?
+  description String?
+  canonical   String?
+  ogImage     String?
+  robots      String?  @default("index, follow")
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        Int       @id @default(autoincrement())
+  adminId   Int?
+  admin     AdminUser? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String?
+  entityId  Int?
+  createdAt DateTime  @default(now())
+}
